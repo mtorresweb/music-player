@@ -338,6 +338,19 @@ class AudioPlayerService {
 		return { isPlaying: this.isPlaying }
 	}
 
+	public async getActualPlaybackStatus(): Promise<PlaybackStatus | null> {
+		if (this.sound) {
+			try {
+				const status = (await this.sound.getStatusAsync()) as PlaybackStatus
+				return status
+			} catch (error) {
+				console.error('Error getting playback status:', error)
+				return null
+			}
+		}
+		return null
+	}
+
 	public async reset() {
 		if (this.sound) {
 			this.stopProgressUpdates()

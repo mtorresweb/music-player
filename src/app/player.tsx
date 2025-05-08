@@ -3,6 +3,7 @@ import { PlayerControls } from '@/components/PlayerControls'
 import { PlayerProgressBar } from '@/components/PlayerProgressbar'
 import { PlayerRepeatToggle } from '@/components/PlayerRepeatToggle'
 import { PlayerVolumeBar } from '@/components/PlayerVolumeBar'
+import { SafeLayout } from '@/components/ui/SafeLayout'
 import { unknownTrackImageUri } from '@/constants/images'
 import { colors, fontSize, screenPadding } from '@/constants/tokens'
 import { useActiveTrack } from '@/hooks/useActiveTrack'
@@ -18,94 +19,104 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 const PlayerScreen = () => {
 	const activeTrack = useActiveTrack()
 	const { imageColors } = usePlayerBackground(activeTrack?.artwork ?? unknownTrackImageUri)
-
-	const { top, bottom } = useSafeAreaInsets()
-
 	const { isFavorite, toggleFavorite } = useTrackPlayerFavorite()
+	const insets = useSafeAreaInsets()
 
 	if (!activeTrack) {
 		return (
-			<View style={[defaultStyles.container, { justifyContent: 'center' }]}>
+			<SafeLayout style={{ justifyContent: 'center' }}>
 				<ActivityIndicator color={colors.icon} />
-			</View>
+			</SafeLayout>
 		)
 	}
 
 	return (
-		<LinearGradient
-			style={{ flex: 1 }}
-			colors={
-				imageColors
-					? [imageColors.background, imageColors.primary]
-					: [colors.background, colors.background]
-			}
-		>
-			<View style={styles.overlayContainer}>
-				<DismissPlayerSymbol />
+		<SafeLayout style={{ padding: 0 }}>
+			<LinearGradient
+				style={{ flex: 1 }}
+				colors={
+					imageColors
+						? [imageColors.background, imageColors.primary]
+						: [colors.background, colors.background]
+				}
+			>
+				<View
+					style={[
+						styles.overlayContainer,
+						{
+							paddingTop: insets.top,
+							paddingBottom: insets.bottom,
+							paddingLeft: insets.left + screenPadding.horizontal,
+							paddingRight: insets.right + screenPadding.horizontal,
+						},
+					]}
+				>
+					<DismissPlayerSymbol />
 
-				<View style={{ flex: 1, marginTop: top + 70, marginBottom: bottom }}>
-					<View style={styles.artworkImageContainer}>
-						<Image
-							source={{
-								uri: activeTrack.artwork ?? unknownTrackImageUri,
-							}}
-							contentFit="cover"
-							transition={300}
-							style={styles.artworkImage}
-						/>
-					</View>
+					<View style={{ flex: 1, marginTop: 70 }}>
+						<View style={styles.artworkImageContainer}>
+							<Image
+								source={{
+									uri: activeTrack.artwork ?? unknownTrackImageUri,
+								}}
+								contentFit="cover"
+								transition={300}
+								style={styles.artworkImage}
+							/>
+						</View>
 
-					<View style={{ flex: 1 }}>
-						<View style={{ marginTop: 'auto' }}>
-							<View style={{ height: 60 }}>
-								<View
-									style={{
-										flexDirection: 'row',
-										justifyContent: 'space-between',
-										alignItems: 'center',
-									}}
-								>
-									{/* Track title */}
-									<View style={styles.trackTitleContainer}>
-										<MovingText
-											text={activeTrack.title ?? ''}
-											animationThreshold={30}
-											style={styles.trackTitleText}
+						<View style={{ flex: 1 }}>
+							<View style={{ marginTop: 'auto' }}>
+								<View style={{ height: 60 }}>
+									<View
+										style={{
+											flexDirection: 'row',
+											justifyContent: 'space-between',
+											alignItems: 'center',
+										}}
+									>
+										{/* Track title */}
+										<View style={styles.trackTitleContainer}>
+											<MovingText
+												text={activeTrack.title ?? ''}
+												animationThreshold={30}
+												style={styles.trackTitleText}
+											/>
+										</View>
+
+										{/* Favorite button icon */}
+										<FontAwesome
+											name={isFavorite ? 'heart' : 'heart-o'}
+											size={20}
+											color={isFavorite ? colors.primary : colors.icon}
+											style={{ marginHorizontal: 14 }}
+											onPress={toggleFavorite}
 										/>
 									</View>
 
-									{/* Favorite button icon */}
-									<FontAwesome
-										name={isFavorite ? 'heart' : 'heart-o'}
-										size={20}
-										color={isFavorite ? colors.primary : colors.icon}
-										style={{ marginHorizontal: 14 }}
-										onPress={toggleFavorite}
-									/>
+									{/* Track artist */}
+									{activeTrack.artist && (
+										<Text numberOfLines={1} style={[styles.trackArtistText, { marginTop: 6 }]}>
+											{activeTrack.artist}
+										</Text>
+									)}
 								</View>
 
-								{/* Track artist */}
-								{activeTrack.artist && (
-									<Text numberOfLines={1} style={[styles.trackArtistText, { marginTop: 6 }]}>
-										{activeTrack.artist}
-									</Text>
-								)}
+								<PlayerProgressBar style={{ marginTop: 32 }} />
+
+								<PlayerControls style={{ marginTop: 40 }} />
 							</View>
 
-							<PlayerProgressBar style={{ marginTop: 32 }} />
+							<PlayerVolumeBar style={{ marginTop: 'auto', marginBottom: 30 }} />
 
-							<PlayerControls style={{ marginTop: 40 }} />
-						</View>
-
-						<PlayerVolumeBar style={{ marginTop: 'auto', marginBottom: 30 }} />
-
-						<View style={utilsStyles.centeredRow}>
-							<PlayerRepeatToggle size={30} style={{ marginBottom: 6 }} />
+							<View style={utilsStyles.centeredRow}>
+								<PlayerRepeatToggle size={30} style={{ marginBottom: 6 }} />
+							</View>
 						</View>
 					</View>
 				</View>
-			</View>
-		</LinearGradient>
+			</LinearGradient>
+		</SafeLayout>
 	)
 }
 
@@ -116,7 +127,7 @@ const DismissPlayerSymbol = () => {
 		<View
 			style={{
 				position: 'absolute',
-				top: top + 8,
+				top: 8,
 				left: 0,
 				right: 0,
 				flexDirection: 'row',
@@ -139,8 +150,7 @@ const DismissPlayerSymbol = () => {
 
 const styles = StyleSheet.create({
 	overlayContainer: {
-		...defaultStyles.container,
-		paddingHorizontal: screenPadding.horizontal,
+		flex: 1,
 		backgroundColor: 'rgba(0,0,0,0.5)',
 	},
 	artworkImageContainer: {

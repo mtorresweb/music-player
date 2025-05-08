@@ -1,4 +1,5 @@
 import { colors } from '@/constants/tokens'
+import { useAppStateHandler } from '@/hooks/useAppStateHandler'
 import { useLogTrackPlayerState } from '@/hooks/useLogTrackPlayerState'
 import { useSetupTrackPlayer } from '@/hooks/useSetupTrackPlayer'
 import { SplashScreen, Stack } from 'expo-router'
@@ -77,6 +78,9 @@ const App = () => {
 	})
 
 	useLogTrackPlayerState()
+
+	// Add app state handler to manage audio playback when app changes state
+	useAppStateHandler()
 
 	if (!isReady) {
 		return null
