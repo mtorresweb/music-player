@@ -44,6 +44,9 @@ export interface Track {
 	[key: string]: any
 }
 
+// Define a type for event listeners
+type EventListener = (...args: any[]) => void
+
 // Audio player class
 class AudioPlayerService {
 	private sound: Audio.Sound | null = null
@@ -56,8 +59,12 @@ class AudioPlayerService {
 	private eventEmitter = new EventEmitter()
 	// Fix the type to use number instead of NodeJS.Timeout
 	private progressUpdateInterval: number | null = null
+	// Track active event listeners to prevent memory leaks
+	private activeListeners: Map<AudioEvent, Set<EventListener>> = new Map()
 
 	constructor() {
+		// Set a higher limit for event listeners to prevent warnings
+		this.eventEmitter.setMaxListeners(20)
 		this.init()
 	}
 
@@ -75,14 +82,35 @@ class AudioPlayerService {
 		})
 	}
 
-	// Event handling
-	public addEventListener(event: AudioEvent, listener: (...args: any[]) => void) {
-		this.eventEmitter.addListener(event, listener)
-		return () => this.eventEmitter.removeListener(event, listener)
+	// Event handling with listener tracking
+	public addEventListener(event: AudioEvent, listener: EventListener) {
+		// Track this listener to prevent duplicates
+		if (!this.activeListeners.has(event)) {
+			this.activeListeners.set(event, new Set())
+		}
+
+		const listeners = this.activeListeners.get(event)!
+		// Only add if it's not already listening
+		if (!listeners.has(listener)) {
+			listeners.add(listener)
+			this.eventEmitter.addListener(event, listener)
+		}
+
+		// Return cleanup function
+		return () => {
+			if (listeners.has(listener)) {
+				listeners.delete(listener)
+				this.eventEmitter.removeListener(event, listener)
+			}
+		}
 	}
 
-	public removeEventListener(event: AudioEvent, listener: (...args: any[]) => void) {
-		this.eventEmitter.removeListener(event, listener)
+	public removeEventListener(event: AudioEvent, listener: EventListener) {
+		const listeners = this.activeListeners.get(event)
+		if (listeners && listeners.has(listener)) {
+			listeners.delete(listener)
+			this.eventEmitter.removeListener(event, listener)
+		}
 	}
 
 	// Queue management
@@ -130,8 +158,18 @@ class AudioPlayerService {
 
 	// Basic playback controls
 	private async loadTrack(track: Track) {
+		// First stop any active playback before unloading
 		if (this.sound) {
-			await this.sound.unloadAsync()
+			try {
+				// Stop first to ensure immediate playback cessation
+				await this.sound.stopAsync()
+				// Then unload to free resources
+				await this.sound.unloadAsync()
+			} catch (error) {
+				console.error('Error stopping previous track:', error)
+			}
+			// Set to null to ensure we don't reference stale sound objects
+			this.sound = null
 		}
 
 		try {
@@ -247,6 +285,24 @@ class AudioPlayerService {
 		if (this.isPlaying) {
 			await this.play()
 		}
+	}
+
+	public async skipToIndex(index: number) {
+		if (this.queue.length === 0 || index < 0 || index >= this.queue.length) return
+
+		// Only load a new track if the index has changed
+		if (index !== this.currentIndex) {
+			this.currentIndex = index
+			await this.loadTrack(this.queue[this.currentIndex])
+			this.eventEmitter.emit(AudioEvent.Next)
+		}
+
+		// Play the track if we were already playing
+		if (this.isPlaying) {
+			await this.play()
+		}
+
+		return this.queue[this.currentIndex]
 	}
 
 	public async seekTo(position: number) {

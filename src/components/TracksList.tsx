@@ -3,9 +3,8 @@ import { unknownTrackImageUri } from '@/constants/images'
 import { AudioPlayer, Track } from '@/constants/playbackService'
 import { useQueue } from '@/store/queue'
 import { utilsStyles } from '@/styles'
-import { useRef } from 'react'
-import { FlatList, FlatListProps, Text, View } from 'react-native'
 import { Image } from 'expo-image'
+import { FlatList, FlatListProps, Text, View } from 'react-native'
 import { QueueControls } from './QueueControls'
 
 export type TracksListProps = Partial<FlatListProps<Track>> & {
@@ -24,7 +23,6 @@ export const TracksList = ({
 	hideQueueControls = false,
 	...flatlistProps
 }: TracksListProps) => {
-	const queueOffset = useRef(0)
 	const { activeQueueId, setActiveQueueId } = useQueue()
 
 	const handleTrackSelect = async (selectedTrack: Track) => {
@@ -32,56 +30,41 @@ export const TracksList = ({
 
 		if (trackIndex === -1) return
 
+		// Check if we're changing queue or selecting within the same queue
 		const isChangingQueue = id !== activeQueueId
 
 		if (isChangingQueue) {
-			const beforeTracks = tracks.slice(0, trackIndex)
-			const afterTracks = tracks.slice(trackIndex + 1)
-
-			// Reset the player
+			// We're changing to a new queue
+			// Reset the player and build a new queue
 			await AudioPlayer.reset()
 
-			// We construct the new queue
-			// First add the selected track
-			await AudioPlayer.add(selectedTrack)
-
-			// Then add tracks after the selected one
-			for (const track of afterTracks) {
+			// Add all tracks to the queue in order
+			for (const track of tracks) {
 				await AudioPlayer.add(track)
 			}
 
-			// Then add tracks before the selected one (to wrap around)
-			for (const track of beforeTracks) {
-				await AudioPlayer.add(track)
-			}
-
-			await AudioPlayer.play()
-
-			queueOffset.current = trackIndex
+			// Set the active queue ID
 			setActiveQueueId(id)
-		} else {
-			const nextTrackIndex =
-				trackIndex - queueOffset.current < 0
-					? tracks.length + trackIndex - queueOffset.current
-					: trackIndex - queueOffset.current
 
-			// In our AudioPlayer implementation, we need to skip to the specific track
+			// Jump directly to the selected track by index
+			await AudioPlayer.skipToIndex(trackIndex)
+
+			// Play the selected track
+			await AudioPlayer.play()
+		} else {
+			// We're selecting a track within the same queue
 			// Get the current queue
 			const queue = AudioPlayer.getQueue()
-			if (nextTrackIndex >= 0 && nextTrackIndex < queue.length) {
-				// Skip to the right track
-				let currentIndex = 0
-				// Skip forward
-				while (currentIndex < nextTrackIndex) {
-					await AudioPlayer.skipToNext()
-					currentIndex++
-				}
-				// Skip backward
-				while (currentIndex > nextTrackIndex) {
-					await AudioPlayer.skipToPrevious()
-					currentIndex--
-				}
-				AudioPlayer.play()
+
+			// Find the selected track in the queue by URL
+			const selectedIndex = queue.findIndex((t) => t.url === selectedTrack.url)
+
+			if (selectedIndex !== -1) {
+				// Jump directly to the selected track
+				await AudioPlayer.skipToIndex(selectedIndex)
+
+				// Play the track
+				await AudioPlayer.play()
 			}
 		}
 	}
@@ -101,10 +84,7 @@ export const TracksList = ({
 				<View>
 					<Text style={utilsStyles.emptyContentText}>No songs found</Text>
 
-					<Image
-						source={{ uri: unknownTrackImageUri }}
-						style={utilsStyles.emptyContentImage}
-					/>
+					<Image source={{ uri: unknownTrackImageUri }} style={utilsStyles.emptyContentImage} />
 				</View>
 			}
 			renderItem={({ item: track }) => (
