@@ -1,0 +1,48 @@
+{
+	"name": "music-player",
+	"version": "1.0.0",
+	"main": "expo-router/entry",
+	"scripts": {
+		"start": "expo start --dev-client=false",
+		"start-dev": "expo start --dev-client",
+		"android": "expo run:android",
+		"ios": "expo run:ios",
+		"lint": "eslint ."
+	},
+	"dependencies": {
+		"@react-native-menu/menu": "^1.2.3",
+		"expo": "^53.0.8",
+		"expo-av": "^15.1.4",
+		"expo-blur": "~14.1.4",
+		"expo-constants": "~17.1.6",
+		"expo-dev-client": "~5.1.8",
+		"expo-image": "~1.10.6",
+		"expo-linear-gradient": "~14.1.4",
+		"expo-linking": "~7.1.4",
+		"expo-router": "~5.0.6",
+		"expo-status-bar": "~2.2.3",
+		"react": "19.0.0",
+		"react-native": "0.79.2",
+		"react-native-awesome-slider": "^2.5.1",
+		"react-native-gesture-handler": "~2.24.0",
+		"react-native-image-colors": "^1.5.2",
+		"react-native-loader-kit": "^2.0.8",
+		"react-native-reanimated": "~3.17.4",
+		"react-native-safe-area-context": "5.4.0",
+		"react-native-screens": "~4.10.0",
+		"ts-pattern": "^5.0.8",
+		"zustand": "^4.5.2"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.24.0",
+		"@types/react": "~19.0.10",
+		"@typescript-eslint/eslint-plugin": "^7.4.0",
+		"@typescript-eslint/parser": "^7.4.0",
+		"eslint": "^8.57.0",
+		"eslint-plugin-react": "^7.34.1",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"prettier": "^3.2.5",
+		"typescript": "^5.3.3"
+	},
+	"private": true
+}
