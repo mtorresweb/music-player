@@ -22,7 +22,7 @@ export const SafeLayout = ({
 				styles.container,
 				{
 					paddingTop: noTopInset ? 0 : insets.top,
-					paddingBottom: noBottomInset ? 0 : insets.bottom,
+					paddingBottom: noBottomInset ? 0 : 0,
 					paddingLeft: insets.left,
 					paddingRight: insets.right,
 				},
