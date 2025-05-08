@@ -1,10 +1,10 @@
 import { AudioPlayer, Track } from '@/constants/playbackService'
 import { useFavorites } from '@/store/library'
 import { useQueue } from '@/store/queue'
-import { MenuView } from '@react-native-menu/menu'
 import { useRouter } from 'expo-router'
 import { PropsWithChildren } from 'react'
 import { match } from 'ts-pattern'
+import { ContextMenu } from './ui/ContextMenu'
 
 type TrackShortcutsMenuProps = PropsWithChildren<{ track: Track }>
 
@@ -49,7 +49,7 @@ export const TrackShortcutsMenu = ({ track, children }: TrackShortcutsMenuProps)
 	}
 
 	return (
-		<MenuView
+		<ContextMenu
 			onPressAction={({ nativeEvent: { event } }) => handlePressAction(event)}
 			actions={[
 				{
@@ -65,6 +65,6 @@ export const TrackShortcutsMenu = ({ track, children }: TrackShortcutsMenuProps)
 			]}
 		>
 			{children}
-		</MenuView>
+		</ContextMenu>
 	)
 }

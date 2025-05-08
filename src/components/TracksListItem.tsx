@@ -1,4 +1,5 @@
 import { TrackShortcutsMenu } from '@/components/TrackShortcutsMenu'
+import { AudioVisualizer } from '@/components/ui/AudioVisualizer'
 import { StopPropagation } from '@/components/utils/StopPropagation'
 import { unknownTrackImageUri } from '@/constants/images'
 import { Track } from '@/constants/playbackService'
@@ -9,7 +10,6 @@ import { defaultStyles } from '@/styles'
 import { Entypo, Ionicons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { StyleSheet, Text, TouchableHighlight, View } from 'react-native'
-import LoaderKit from 'react-native-loader-kit'
 
 export type TracksListItemProps = {
 	track: Track
@@ -42,11 +42,7 @@ export const TracksListItem = ({
 
 					{isActiveTrack &&
 						(playing ? (
-							<LoaderKit
-								style={styles.trackPlayingIconIndicator}
-								name="LineScaleParty"
-								color={colors.icon}
-							/>
+							<AudioVisualizer style={styles.trackPlayingIconIndicator} color={colors.icon} />
 						) : (
 							<Ionicons
 								style={styles.trackPausedIndicator}
