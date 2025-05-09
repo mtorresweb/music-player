@@ -10,20 +10,20 @@
 		"splash": {
 			"image": "./assets/splash.png",
 			"resizeMode": "contain",
-			"backgroundColor": "#000"
+			"backgroundColor": "#000000"
 		},
 		"assetBundlePatterns": ["**/*"],
 		"ios": {
 			"supportsTablet": true,
 			"bundleIdentifier": "com.music.player",
 			"infoPlist": {
-				"UIBackgroundModes": ["audio"]
+				"UIBackgroundModes": ["audio", "audio"]
 			}
 		},
 		"android": {
 			"adaptiveIcon": {
 				"foregroundImage": "./assets/adaptive-icon.png",
-				"backgroundColor": "#000"
+				"backgroundColor": "#000000"
 			},
 			"package": "com.music.player"
 		},
@@ -34,6 +34,18 @@
 		"experiments": {
 			"typedRoutes": true,
 			"tsconfigPaths": true
+		},
+		"extra": {
+			"router": {},
+			"eas": {
+				"projectId": "8b189c16-377f-47ee-8e98-9fc8877d9a0f"
+			}
+		},
+		"runtimeVersion": {
+			"policy": "appVersion"
+		},
+		"updates": {
+			"url": "https://u.expo.dev/8b189c16-377f-47ee-8e98-9fc8877d9a0f"
 		}
 	}
 }
